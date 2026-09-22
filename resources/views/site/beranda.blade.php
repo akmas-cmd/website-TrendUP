@@ -439,9 +439,10 @@ function addToCart(id, btn){
   showToast(`${product.name} ${I18N.addedToCart}`);
 
   if(btn){
+    const originalHtml = btn.innerHTML;
     btn.classList.add("added");
-    btn.textContent = I18N.added;
-    setTimeout(()=>{ btn.classList.remove("added"); btn.textContent = I18N.addToCart; }, 1200);
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+    setTimeout(()=>{ btn.classList.remove("added"); btn.innerHTML = originalHtml; }, 1200);
   }
 }
 

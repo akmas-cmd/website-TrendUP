@@ -51,6 +51,12 @@
         </div>
       @endif
 
+      @if (session('status') === 'registered')
+        <div class="alert-trendup show" style="display:block;">
+          <i class="fa-solid fa-circle-check"></i> {{ __('site.register_success') }}
+        </div>
+      @endif
+
       <div class="alert-trendup" id="successAlert">
         <i class="fa-solid fa-circle-check"></i> {{ __('site.login_success') }}
       </div>

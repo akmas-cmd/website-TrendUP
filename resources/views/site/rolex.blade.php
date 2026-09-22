@@ -415,7 +415,7 @@ function addToCart(){
     existing.qty += qty;
   } else {
     cart.push({
-      id: Date.now(),
+      id: productId,
       name: productName,
       color: selectedColor,
       price: basePrice,

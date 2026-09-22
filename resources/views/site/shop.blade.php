@@ -281,7 +281,23 @@ function toggleWishlist(id, btn){
   });
 }
 
-let cart = [];
+// Sumber data cart: localStorage, sama seperti di beranda.blade.php,
+// rolex.blade.php dan checkout.blade.php ("trendup_cart"). Sebelumnya
+// halaman ini pakai cart in-memory saja (let cart = []) dan tidak pernah
+// baca/tulis localStorage, jadi produk yang ditambahkan lewat halaman
+// /shop tidak pernah tersimpan dan tidak muncul lagi di halaman lain
+// (cart, checkout, dst).
+const CART_KEY = "trendup_cart";
+
+function loadCart(){
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+let cart = loadCart();
 let activeFilter = I18N.filterAll;
 let currentPage = 1;
 const pageSize = 24;
@@ -454,6 +470,8 @@ function showToast(message){
 }
 
 function updateCartUI(){
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+
   const totalQty = cart.reduce((a,b)=>a+b.qty,0);
   document.getElementById("cartCount").textContent = totalQty;
 
@@ -536,6 +554,14 @@ sortMenu.querySelectorAll("li").forEach(li => {
 document.addEventListener("click", (e) => {
   if(!sortDropdown.contains(e.target)){
     sortDropdown.classList.remove("open");
+  }
+});
+
+// Sinkronkan cart antar tab/halaman yang terbuka bersamaan
+window.addEventListener("storage", (e) => {
+  if(e.key === CART_KEY){
+    cart = loadCart();
+    updateCartUI();
   }
 });
 

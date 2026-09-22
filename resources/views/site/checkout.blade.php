@@ -295,18 +295,26 @@ function submitOrder(){
     },
     body: JSON.stringify(payload),
   })
-  .then(res => {
-    if(!res.ok) throw new Error("Gagal membuat pesanan");
-    return res.json();
+  .then(async res => {
+    const data = await res.json().catch(() => null);
+    if(!res.ok){
+      console.error("Checkout gagal:", res.status, data);
+      let msg = (data && data.message) || "Gagal membuat pesanan, coba lagi.";
+      if(data && data.errors){
+        msg = Object.values(data.errors).flat().join("\n");
+      }
+      throw new Error(msg);
+    }
+    return data;
   })
   .then(data => {
     localStorage.removeItem("trendup_cart");
     window.location.href = data.redirect;
   })
-  .catch(() => {
+  .catch(err => {
     btn.disabled = false;
     btn.innerHTML = I18N.confirmBtn + ' <i class="fa-solid fa-arrow-right"></i>';
-    alert("Gagal membuat pesanan, coba lagi.");
+    alert(err.message || "Gagal membuat pesanan, coba lagi.");
   });
 }
 

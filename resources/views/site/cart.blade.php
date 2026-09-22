@@ -64,7 +64,7 @@
 <div class="page-header">
   <div class="container">
     <div class="breadcrumb-trendup">
-      <a href="{{ route('home') }}">{{ __('site.nav_home') }}</a> / <a href="#">{{ __('site.nav_shop') }}</a> / <span class="current">{{ __('site.breadcrumb_cart') }}</span>
+      <a href="{{ route('home') }}">{{ __('site.nav_home') }}</a> / <a href="{{ route('shop') }}">{{ __('site.nav_shop') }}</a> / <span class="current">{{ __('site.breadcrumb_cart') }}</span>
     </div>
     <h1>{{ __('site.cart_title') }}</h1>
 
@@ -92,7 +92,7 @@
         </div>
         <div id="cartRows"></div>
 
-        <a href="#" class="btn-continue"><i class="fa-solid fa-arrow-left"></i> {{ __('site.btn_continue_shopping') }}</a>
+        <a href="{{ route('shop') }}" class="btn-continue"><i class="fa-solid fa-arrow-left"></i> {{ __('site.btn_continue_shopping') }}</a>
       </div>
 
       <div class="col-lg-4">
@@ -125,7 +125,7 @@
       <i class="fa-solid fa-bag-shopping"></i>
       <h3>{{ __('site.empty_cart_title') }}</h3>
       <p>{{ __('site.empty_cart_desc') }}</p>
-      <a href="#" class="btn-shopnow" style="background:var(--jet);color:var(--white);padding:14px 32px;border-radius:999px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">{{ __('site.btn_shop_now') }}</a>
+      <a href="{{ route('shop') }}" class="btn-shopnow" style="background:var(--jet);color:var(--white);padding:14px 32px;border-radius:999px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">{{ __('site.btn_shop_now') }}</a>
     </div>
   </div>
 </section>
@@ -175,10 +175,27 @@ function catLabel(key){
   return CAT_LABEL[key] || key;
 }
 
-let cart = [
-  {id:1, name:"TRENDUP Chrono Black", cat:"jam-tangan", price:350000, qty:1, size:null, icon:"fa-solid fa-clock"},
-  {id:5, name:"TRENDUP Runner Lime", cat:"sepatu", price:425000, qty:1, size:"41", icon:"fa-solid fa-shoe-prints"},
-];
+// ===== SUMBER DATA KERANJANG (localStorage) =====
+// Kunci ini SAMA PERSIS dengan yang dipakai di beranda.blade.php, shop.blade.php,
+// rolex.blade.php (product detail) dan checkout.blade.php ("trendup_cart"),
+// supaya item yang ditambahkan dari halaman lain benar-benar muncul di sini —
+// sebelumnya halaman ini pakai 2 produk contoh yang di-hardcode dan tidak
+// pernah membaca localStorage sama sekali.
+const CART_KEY = "trendup_cart";
+
+function loadCart(){
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCart(){
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
+let cart = loadCart();
 
 function formatRupiah(num){
   return "Rp " + num.toLocaleString("id-ID");
@@ -201,7 +218,11 @@ function renderCart(){
   rows.innerHTML = cart.map(item => `
     <div class="cart-row">
       <div class="cart-product">
-        <div class="cart-thumb"><i class="${item.icon}"></i></div>
+        <div class="cart-thumb">
+          ${item.img
+            ? `<img src="${item.img}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><i class="${item.icon}" style="display:none;"></i>`
+            : `<i class="${item.icon}"></i>`}
+        </div>
         <div>
           <div class="cart-name">${item.name}</div>
           <div class="cart-meta">${catLabel(item.cat)}</div>
@@ -231,12 +252,14 @@ function changeQty(id, delta){
     cart = cart.filter(i => i.id !== id);
     showToast(I18N.removedGeneric);
   }
+  saveCart();
   renderCart();
 }
 
 function removeItem(id){
   const item = cart.find(i => i.id === id);
   cart = cart.filter(i => i.id !== id);
+  saveCart();
   renderCart();
   if(item) showToast(`${item.name} ${I18N.removedSuffix}`);
 }
@@ -264,6 +287,15 @@ function showToast(msg){
   toast.classList.add("show");
   setTimeout(()=> toast.classList.remove("show"), 2000);
 }
+
+// Sinkronkan cart antar tab/halaman yang terbuka bersamaan (mis. tambah produk
+// di tab shop, lalu tab cart yang sudah terbuka ikut ter-update tanpa reload).
+window.addEventListener("storage", (e) => {
+  if(e.key === CART_KEY){
+    cart = loadCart();
+    renderCart();
+  }
+});
 
 renderCart();
 </script>

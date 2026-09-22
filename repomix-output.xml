@@ -117,7 +117,7 @@ database/
     2026_09_16_100002_create_contact_messages_table.php
     2026_09_17_000000_add_address_to_users_table.php
     2026_09_17_000000_create_reviews_table.php
-    2026_09_21_000000_add_media_to_reviews_table
+    2026_09_21_000000_add_media_to_reviews_table.php
   seeders/
     DatabaseSeeder.php
     ShopProductSeeder.php
@@ -293,6 +293,11 @@ public/
     The_North_Face_T-Shirt_TEEN_EVOLUTION_HALF_DOME_SS_TEE_für_Jugendliche__mit_sportlichem_Stil__Kurzarmdesign__aus_Baumwolle-removebg-preview.png
     topi_weekend_offender-removebg-preview.png
     trend.png
+  uploads/
+    reviews/
+      28657729-10ab-4e36-a140-f69bb5b9a1e1.png
+      b7d905fc-8b1d-4d35-981d-25b0286a2eb8.png
+      bdece5e9-6b47-4b02-9420-d5f3c75c644f.png
   .htaccess
   index.php
 resources/
@@ -398,6 +403,33 @@ README.md
 
 <files>
 This section contains the contents of the repository's files.
+
+<file path="database/migrations/2026_09_21_000000_add_media_to_reviews_table.php">
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('reviews', function (Blueprint $table) {
+            // Daftar foto & video ulasan, contoh:
+            // [{"type":"image","path":"/uploads/reviews/a.jpg"},{"type":"video","path":"/uploads/reviews/b.mp4"}]
+            $table->json('media')->nullable()->after('comment');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('reviews', function (Blueprint $table) {
+            $table->dropColumn('media');
+        });
+    }
+};
+</file>
 
 <file path="app/Http/Controllers/Admin/DashboardController.php">
 <?php
@@ -3533,33 +3565,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('reviews');
-    }
-};
-</file>
-
-<file path="database/migrations/2026_09_21_000000_add_media_to_reviews_table">
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    public function up(): void
-    {
-        Schema::table('reviews', function (Blueprint $table) {
-            // Daftar foto & video ulasan, contoh:
-            // [{"type":"image","path":"/uploads/reviews/a.jpg"},{"type":"video","path":"/uploads/reviews/b.mp4"}]
-            $table->json('media')->nullable()->after('comment');
-        });
-    }
-
-    public function down(): void
-    {
-        Schema::table('reviews', function (Blueprint $table) {
-            $table->dropColumn('media');
-        });
     }
 };
 </file>
@@ -48609,9 +48614,10 @@ function addToCart(id, btn){
   showToast(`${product.name} ${I18N.addedToCart}`);
 
   if(btn){
+    const originalHtml = btn.innerHTML;
     btn.classList.add("added");
-    btn.textContent = I18N.added;
-    setTimeout(()=>{ btn.classList.remove("added"); btn.textContent = I18N.addToCart; }, 1200);
+    btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+    setTimeout(()=>{ btn.classList.remove("added"); btn.innerHTML = originalHtml; }, 1200);
   }
 }
 
@@ -48772,7 +48778,7 @@ updateCartUI();
 <div class="page-header">
   <div class="container">
     <div class="breadcrumb-trendup">
-      <a href="{{ route('home') }}">{{ __('site.nav_home') }}</a> / <a href="#">{{ __('site.nav_shop') }}</a> / <span class="current">{{ __('site.breadcrumb_cart') }}</span>
+      <a href="{{ route('home') }}">{{ __('site.nav_home') }}</a> / <a href="{{ route('shop') }}">{{ __('site.nav_shop') }}</a> / <span class="current">{{ __('site.breadcrumb_cart') }}</span>
     </div>
     <h1>{{ __('site.cart_title') }}</h1>
 
@@ -48800,7 +48806,7 @@ updateCartUI();
         </div>
         <div id="cartRows"></div>
 
-        <a href="#" class="btn-continue"><i class="fa-solid fa-arrow-left"></i> {{ __('site.btn_continue_shopping') }}</a>
+        <a href="{{ route('shop') }}" class="btn-continue"><i class="fa-solid fa-arrow-left"></i> {{ __('site.btn_continue_shopping') }}</a>
       </div>
 
       <div class="col-lg-4">
@@ -48833,7 +48839,7 @@ updateCartUI();
       <i class="fa-solid fa-bag-shopping"></i>
       <h3>{{ __('site.empty_cart_title') }}</h3>
       <p>{{ __('site.empty_cart_desc') }}</p>
-      <a href="#" class="btn-shopnow" style="background:var(--jet);color:var(--white);padding:14px 32px;border-radius:999px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">{{ __('site.btn_shop_now') }}</a>
+      <a href="{{ route('shop') }}" class="btn-shopnow" style="background:var(--jet);color:var(--white);padding:14px 32px;border-radius:999px;font-weight:800;text-transform:uppercase;letter-spacing:1px;">{{ __('site.btn_shop_now') }}</a>
     </div>
   </div>
 </section>
@@ -48883,10 +48889,27 @@ function catLabel(key){
   return CAT_LABEL[key] || key;
 }
 
-let cart = [
-  {id:1, name:"TRENDUP Chrono Black", cat:"jam-tangan", price:350000, qty:1, size:null, icon:"fa-solid fa-clock"},
-  {id:5, name:"TRENDUP Runner Lime", cat:"sepatu", price:425000, qty:1, size:"41", icon:"fa-solid fa-shoe-prints"},
-];
+// ===== SUMBER DATA KERANJANG (localStorage) =====
+// Kunci ini SAMA PERSIS dengan yang dipakai di beranda.blade.php, shop.blade.php,
+// rolex.blade.php (product detail) dan checkout.blade.php ("trendup_cart"),
+// supaya item yang ditambahkan dari halaman lain benar-benar muncul di sini —
+// sebelumnya halaman ini pakai 2 produk contoh yang di-hardcode dan tidak
+// pernah membaca localStorage sama sekali.
+const CART_KEY = "trendup_cart";
+
+function loadCart(){
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCart(){
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+}
+
+let cart = loadCart();
 
 function formatRupiah(num){
   return "Rp " + num.toLocaleString("id-ID");
@@ -48909,7 +48932,11 @@ function renderCart(){
   rows.innerHTML = cart.map(item => `
     <div class="cart-row">
       <div class="cart-product">
-        <div class="cart-thumb"><i class="${item.icon}"></i></div>
+        <div class="cart-thumb">
+          ${item.img
+            ? `<img src="${item.img}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"><i class="${item.icon}" style="display:none;"></i>`
+            : `<i class="${item.icon}"></i>`}
+        </div>
         <div>
           <div class="cart-name">${item.name}</div>
           <div class="cart-meta">${catLabel(item.cat)}</div>
@@ -48939,12 +48966,14 @@ function changeQty(id, delta){
     cart = cart.filter(i => i.id !== id);
     showToast(I18N.removedGeneric);
   }
+  saveCart();
   renderCart();
 }
 
 function removeItem(id){
   const item = cart.find(i => i.id === id);
   cart = cart.filter(i => i.id !== id);
+  saveCart();
   renderCart();
   if(item) showToast(`${item.name} ${I18N.removedSuffix}`);
 }
@@ -48972,6 +49001,15 @@ function showToast(msg){
   toast.classList.add("show");
   setTimeout(()=> toast.classList.remove("show"), 2000);
 }
+
+// Sinkronkan cart antar tab/halaman yang terbuka bersamaan (mis. tambah produk
+// di tab shop, lalu tab cart yang sudah terbuka ikut ter-update tanpa reload).
+window.addEventListener("storage", (e) => {
+  if(e.key === CART_KEY){
+    cart = loadCart();
+    renderCart();
+  }
+});
 
 renderCart();
 </script>
@@ -49277,18 +49315,26 @@ function submitOrder(){
     },
     body: JSON.stringify(payload),
   })
-  .then(res => {
-    if(!res.ok) throw new Error("Gagal membuat pesanan");
-    return res.json();
+  .then(async res => {
+    const data = await res.json().catch(() => null);
+    if(!res.ok){
+      console.error("Checkout gagal:", res.status, data);
+      let msg = (data && data.message) || "Gagal membuat pesanan, coba lagi.";
+      if(data && data.errors){
+        msg = Object.values(data.errors).flat().join("\n");
+      }
+      throw new Error(msg);
+    }
+    return data;
   })
   .then(data => {
     localStorage.removeItem("trendup_cart");
     window.location.href = data.redirect;
   })
-  .catch(() => {
+  .catch(err => {
     btn.disabled = false;
     btn.innerHTML = I18N.confirmBtn + ' <i class="fa-solid fa-arrow-right"></i>';
-    alert("Gagal membuat pesanan, coba lagi.");
+    alert(err.message || "Gagal membuat pesanan, coba lagi.");
   });
 }
 
@@ -50875,7 +50921,7 @@ function addToCart(){
     existing.qty += qty;
   } else {
     cart.push({
-      id: Date.now(),
+      id: productId,
       name: productName,
       color: selectedColor,
       price: basePrice,
@@ -51512,7 +51558,23 @@ function toggleWishlist(id, btn){
   });
 }
 
-let cart = [];
+// Sumber data cart: localStorage, sama seperti di beranda.blade.php,
+// rolex.blade.php dan checkout.blade.php ("trendup_cart"). Sebelumnya
+// halaman ini pakai cart in-memory saja (let cart = []) dan tidak pernah
+// baca/tulis localStorage, jadi produk yang ditambahkan lewat halaman
+// /shop tidak pernah tersimpan dan tidak muncul lagi di halaman lain
+// (cart, checkout, dst).
+const CART_KEY = "trendup_cart";
+
+function loadCart(){
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+let cart = loadCart();
 let activeFilter = I18N.filterAll;
 let currentPage = 1;
 const pageSize = 24;
@@ -51685,6 +51747,8 @@ function showToast(message){
 }
 
 function updateCartUI(){
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+
   const totalQty = cart.reduce((a,b)=>a+b.qty,0);
   document.getElementById("cartCount").textContent = totalQty;
 
@@ -51767,6 +51831,14 @@ sortMenu.querySelectorAll("li").forEach(li => {
 document.addEventListener("click", (e) => {
   if(!sortDropdown.contains(e.target)){
     sortDropdown.classList.remove("open");
+  }
+});
+
+// Sinkronkan cart antar tab/halaman yang terbuka bersamaan
+window.addEventListener("storage", (e) => {
+  if(e.key === CART_KEY){
+    cart = loadCart();
+    updateCartUI();
   }
 });
 

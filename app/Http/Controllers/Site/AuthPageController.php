@@ -57,7 +57,7 @@ class AuthPageController extends Controller
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
-        $user = User::create([
+        User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
@@ -65,9 +65,9 @@ class AuthPageController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        Auth::login($user);
-
-        return redirect()->route('home');
+        // Setelah daftar, jangan auto-login. Arahkan ke halaman login
+        // supaya user login manual dulu.
+        return redirect()->route('login')->with('status', 'registered');
     }
 
     public function logout(Request $request): RedirectResponse
