@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class CheckoutController extends Controller
@@ -50,6 +52,25 @@ class CheckoutController extends Controller
         $total = $subtotal + $shippingFee;
 
         $order = DB::transaction(function () use ($request, $validated, $subtotal, $shippingFee, $total) {
+            // --- CEK & KURANGI STOK PRODUK ---
+            // lockForUpdate() supaya kalau ada 2 orang checkout barang yang sama
+            // secara bersamaan, stoknya tetap dihitung dengan benar (tidak bentrok).
+            foreach ($validated['items'] as $item) {
+                $product = Product::whereKey($item['id'])->lockForUpdate()->first();
+
+                if (! $product) {
+                    throw ValidationException::withMessages([
+                        'items' => "Produk \"{$item['name']}\" tidak ditemukan.",
+                    ]);
+                }
+
+                if ($product->stock < $item['qty']) {
+                    throw ValidationException::withMessages([
+                        'items' => "Stok \"{$product->name}\" tidak mencukupi. Sisa stok: {$product->stock}.",
+                    ]);
+                }
+            }
+
             $order = Order::create([
                 'user_id' => $request->user()->id,
                 'order_number' => $this->generateOrderNumber(),
@@ -76,6 +97,9 @@ class CheckoutController extends Controller
                     'icon' => $item['icon'] ?? null,
                     'image' => $item['img'] ?? null,
                 ]);
+
+                // Kurangi stok produk sesuai jumlah yang dipesan.
+                Product::whereKey($item['id'])->decrement('stock', $item['qty']);
             }
 
             return $order;

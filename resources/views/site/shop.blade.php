@@ -14,7 +14,7 @@
 
 <nav class="navbar-trendup">
   <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
-    <a href="{{ route('home') }}" class="brand-logo">TRENDUP</a>
+    <a href="{{ route('home') }}" class="brand-logo">TREND<span>UP</span></a>
 
     <div class="nav-links d-none d-lg-flex">
       <a href="{{ route('home') }}">{{ __('site.nav_home') }}</a>
@@ -28,21 +28,18 @@
         <i class="fa-solid fa-magnifying-glass" style="color:var(--cool-gray)"></i>
         <input type="text" id="searchInput" placeholder="{{ __('site.search_placeholder') }}">
       </div>
+      <a href="{{ route('wishlist') }}" class="icon-btn" style="text-decoration:none;">
+        <i class="fa-solid fa-heart"></i>
+      </a>
       <button class="icon-btn" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
         <i class="fa-solid fa-cart-shopping"></i>
         <span class="cart-count" id="cartCount">0</span>
       </button>
 
       <!-- Language switcher -->
-      <div class="lang-switch-dropdown" id="langSwitchDropdown">
-        <button class="lang-switch-btn" type="button" id="langSwitchToggle">
-          <span>{{ strtoupper(app()->getLocale()) }}</span>
-          <i class="fa-solid fa-chevron-down"></i>
-        </button>
-        <ul class="lang-switch-menu" id="langSwitchMenu">
-          <li class="{{ app()->getLocale() === 'id' ? 'active' : '' }}"><a href="{{ route('lang.switch', 'id') }}">Bahasa Indonesia</a></li>
-          <li class="{{ app()->getLocale() === 'en' ? 'active' : '' }}"><a href="{{ route('lang.switch', 'en') }}">English</a></li>
-        </ul>
+      <div class="lang-switch-toggle">
+        <a href="{{ route('lang.switch', 'id') }}" class="lang-switch-option {{ app()->getLocale() === 'id' ? 'active' : '' }}">ID</a>
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-switch-option {{ app()->getLocale() === 'en' ? 'active' : '' }}">EN</a>
       </div>
 
       @guest
@@ -122,7 +119,7 @@
         <div class="mt-3">
           <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
           <a href="#" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
-          <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" class="social-icon"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
       </div>
       <div class="col-6 col-lg-2">
@@ -189,20 +186,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script>
 
-// ===== LANGUAGE SWITCHER DROPDOWN =====
-const langSwitchDropdown = document.getElementById("langSwitchDropdown");
-const langSwitchToggle = document.getElementById("langSwitchToggle");
-if (langSwitchDropdown && langSwitchToggle) {
-  langSwitchToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    langSwitchDropdown.classList.toggle("open");
-  });
-  document.addEventListener("click", (e) => {
-    if (!langSwitchDropdown.contains(e.target)) {
-      langSwitchDropdown.classList.remove("open");
-    }
-  });
-}
 // String terjemahan dari Blade untuk dipakai JS
 const I18N = {
   filterAll: @json(__('site.filter_all')),
@@ -381,9 +364,12 @@ function productCard(p){
             <span class="rating-text">${rating.toFixed(1)}${p.reviewCount ? ` (${p.reviewCount})` : ''}</span>
           </div>
           <div class="product-price">${formatRupiah(p.price)}</div>
+          <div class="stock-row" style="font-size:12px;font-weight:600;margin:2px 0 4px;color:${p.stock > 0 ? 'var(--cool-gray)' : '#e0245e'};">
+            ${p.stock > 0 ? `Stok: ${p.stock}` : 'Stok habis'}
+          </div>
           <div class="d-flex gap-2 product-actions">
             <button class="btn-addcart" style="flex:1;width:auto;" onclick="goToDetail(${p.id})">${I18N.viewDetail}</button>
-            <button class="btn-cart-icon" onclick="addToCart(${p.id})" title="${I18N.addToCart}">
+            <button class="btn-cart-icon" onclick="addToCart(${p.id})" title="${I18N.addToCart}" ${p.stock <= 0 ? 'disabled style="opacity:.4;cursor:not-allowed;"' : ''}>
               <i class="fa-solid fa-cart-shopping"></i>
             </button>
           </div>

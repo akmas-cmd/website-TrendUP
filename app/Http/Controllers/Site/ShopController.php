@@ -27,6 +27,7 @@ class ShopController extends Controller
                 'name' => $p->name,
                 'cat' => $p->category->key,
                 'price' => $p->price,
+                'stock' => $p->stock,
                 'badge' => $p->badge ?? '',
                 'icon' => $p->icon,
                 'img' => $p->image,

@@ -33,15 +33,9 @@ a{text-decoration:none;}
   font-size:28px;
   letter-spacing:1px;
   color:var(--jet);
-  position:relative;
 }
-.brand-logo::after{
-  content:"";
-  position:absolute;
-  bottom:-2px; left:0;
-  width:60%; height:5px;
-  background:var(--lime);
-  transform:skewX(-20deg);
+.brand-logo span{
+  color:var(--lime);
 }
 .btn-login{
   height:42px;
@@ -62,86 +56,35 @@ a{text-decoration:none;}
 }
 .btn-login:hover{background:var(--lime);color:var(--jet)!important;}
 .btn-login::after{display:none!important;content:none!important;}
-.lang-switch-btn{
-  height:42px;
-  line-height:1;
-  background:var(--jet);
-  color:var(--white)!important;
-  border:none;
-  padding:9px 16px;
-  border-radius:999px;
-  font-weight:700;
-  font-size:13px;
-  text-transform:uppercase;
+/* ===== LANGUAGE SWITCH TOGGLE (ID / EN, tanpa dropdown) ===== */
+.lang-switch-toggle{
   display:inline-flex;
   align-items:center;
-  gap:6px;
-}
-.lang-switch-btn:hover,
-.lang-switch-btn:focus{
   background:var(--jet);
+  border-radius:999px;
+  padding:4px;
+  gap:2px;
+}
+.lang-switch-option{
+  padding:7px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.5px;
   color:var(--white)!important;
-}
-.lang-switch-btn::after{
-  border-top-color:var(--white);
-}
-
-/* ===== LANGUAGE SWITCHER DROPDOWN ===== */
-.lang-switch-dropdown{
-  position:relative;
-  user-select:none;
-}
-.lang-switch-dropdown .lang-switch-btn i{
-  font-size:10px;
-  transition:transform .2s ease;
-}
-.lang-switch-dropdown.open .lang-switch-btn i{
-  transform:rotate(180deg);
-}
-.lang-switch-menu{
-  list-style:none;
-  margin:0;
-  padding:6px;
-  position:absolute;
-  top:calc(100% + 8px);
-  right:0;
-  min-width:180px;
-  background:var(--white);
-  border:2px solid var(--jet);
-  border-radius:14px;
-  box-shadow:6px 6px 0px var(--jet);
-  opacity:0;
-  visibility:hidden;
-  transform:translateY(-6px);
-  transition:opacity .18s ease, transform .18s ease, visibility .18s;
-  z-index:1100;
-}
-.lang-switch-dropdown.open .lang-switch-menu{
-  opacity:1;
-  visibility:visible;
-  transform:translateY(0);
-}
-.lang-switch-menu li{
-  border-radius:10px;
-  overflow:hidden;
-}
-.lang-switch-menu li a{
-  display:block;
-  padding:10px 14px;
-  font-size:13px;
-  font-weight:600;
-  color:var(--jet)!important;
-  border-radius:10px;
   text-decoration:none;
-  transition:background .12s ease, color .12s ease;
+  transition:background .15s ease, color .15s ease;
 }
-.lang-switch-menu li a:hover{
-  background:var(--soft-gray);
+.lang-switch-option:hover{
+  color:var(--lime)!important;
 }
-.lang-switch-menu li.active a{
-  background:var(--lime);
+.lang-switch-option.active{
+  background:var(--white);
   color:var(--jet)!important;
-  font-weight:800;
+}
+.lang-switch-option.active:hover{
+  color:var(--jet)!important;
 }
 
 /* ===== Account dropdown menu (disamakan dgn lang-switch-menu) ===== */

@@ -34,15 +34,9 @@ a{text-decoration:none;}
   font-size:28px;
   letter-spacing:1px;
   color:var(--jet);
-  position:relative;
 }
-.brand-logo::after{
-  content:"";
-  position:absolute;
-  bottom:-2px; left:0;
-  width:60%; height:5px;
-  background:var(--lime);
-  transform:skewX(-20deg);
+.brand-logo span{
+  color:var(--lime);
 }
 
 /* ===== PAGE HEADER ===== */
@@ -171,6 +165,7 @@ a{text-decoration:none;}
   flex-shrink:0;
 }
 .summary-item .thumb i{color:var(--cool-gray);font-size:20px;}
+.summary-item .thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px;}
 .summary-item .name{font-weight:700;font-size:13px;}
 .summary-item .meta{font-size:12px;color:var(--cool-gray);}
 .summary-item .price{font-weight:700;font-size:13px;margin-left:auto;white-space:nowrap;}
@@ -206,48 +201,81 @@ a{text-decoration:none;}
   .summary-card{position:static;margin-top:24px;}
 }
 
-.lang-switch-btn{
-  background:var(--jet);
-  color:var(--white)!important;
-  border:none;
-  padding:9px 16px;
-  border-radius:999px;
-  font-weight:700;
-  font-size:13px;
-  text-transform:uppercase;
+/* ===== LANGUAGE SWITCH TOGGLE (ID / EN, tanpa dropdown) ===== */
+.lang-switch-toggle{
   display:inline-flex;
   align-items:center;
-  gap:6px;
-}
-.lang-switch-btn:hover,
-.lang-switch-btn:focus{
   background:var(--jet);
-  color:var(--white)!important;
+  border-radius:999px;
+  padding:4px;
+  gap:2px;
 }
-.lang-switch-btn::after{
-  border-top-color:var(--white);
+.lang-switch-option{
+  padding:7px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  color:var(--white)!important;
+  text-decoration:none;
+  transition:background .15s ease, color .15s ease;
+}
+.lang-switch-option:hover{
+  color:var(--lime)!important;
+}
+.lang-switch-option.active{
+  background:var(--white);
+  color:var(--jet)!important;
+}
+.lang-switch-option.active:hover{
+  color:var(--jet)!important;
 }
 
-/* ===== LANGUAGE SWITCHER DROPDOWN (custom, matches site design language) ===== */
-.lang-switch-dropdown{
+/* ===== CITY DROPDOWN (form select, disamakan dgn lang-switch-menu) ===== */
+.city-switch-dropdown{
   position:relative;
   user-select:none;
 }
-.lang-switch-dropdown .lang-switch-btn i{
-  font-size:10px;
+.city-switch-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  background:var(--white);
+  text-align:left;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  -moz-appearance:none;
+  outline:none;
+}
+.city-switch-btn::-moz-focus-inner{
+  border:0;
+  padding:0;
+}
+.city-switch-btn span.city-placeholder-text{
+  color:#9a9a9a;
+}
+.city-switch-btn i{
+  font-size:11px;
+  color:var(--cool-gray);
   transition:transform .2s ease;
 }
-.lang-switch-dropdown.open .lang-switch-btn i{
+.city-switch-dropdown.open .city-switch-btn i{
   transform:rotate(180deg);
 }
-.lang-switch-menu{
+.city-switch-menu{
   list-style:none;
   margin:0;
   padding:6px;
   position:absolute;
   top:calc(100% + 8px);
+  left:0;
   right:0;
-  min-width:180px;
+  max-height:220px;
+  overflow-y:auto;
   background:var(--white);
   border:2px solid var(--jet);
   border-radius:14px;
@@ -258,32 +286,22 @@ a{text-decoration:none;}
   transition:opacity .18s ease, transform .18s ease, visibility .18s;
   z-index:1100;
 }
-.lang-switch-dropdown.open .lang-switch-menu{
+.city-switch-dropdown.open .city-switch-menu{
   opacity:1;
   visibility:visible;
   transform:translateY(0);
 }
-.lang-switch-menu li{
-  border-radius:10px;
-  overflow:hidden;
-}
-.lang-switch-menu li a{
-  display:block;
+.city-switch-menu li{
   padding:10px 14px;
   font-size:13px;
   font-weight:600;
-  color:var(--jet)!important;
+  color:var(--jet);
   border-radius:10px;
-  text-decoration:none;
-  transition:background .12s ease, color .12s ease;
+  cursor:pointer;
+  transition:background .12s ease;
 }
-.lang-switch-menu li a:hover{
+.city-switch-menu li:hover{
   background:var(--soft-gray);
-}
-.lang-switch-menu li.active a{
-  background:var(--lime);
-  color:var(--jet)!important;
-  font-weight:800;
 }
 
 /* ===== Account dropdown menu (disamakan dgn lang-switch-menu) ===== */

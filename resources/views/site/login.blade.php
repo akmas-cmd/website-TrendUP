@@ -15,7 +15,7 @@
 
   <!-- ===== LEFT BRAND PANEL ===== -->
   <div class="brand-panel">
-    <a href="{{ route('home') }}" class="brand-logo" style="display:inline-block;">TRENDUP</a>
+    <a href="{{ route('home') }}" class="brand-logo" style="display:inline-block;">TREND<span>UP</span></a>
     <span class="brand-tagline">{{ __('site.login_tagline') }}</span>
 
     <div class="brand-image-wrap">
@@ -29,15 +29,9 @@
   <div class="form-panel">
     <div class="form-box">
       <div class="d-flex justify-content-end mb-2">
-        <div class="lang-switch-dropdown" id="langSwitchDropdown">
-        <button class="lang-switch-btn" type="button" id="langSwitchToggle">
-          <span>{{ strtoupper(app()->getLocale()) }}</span>
-          <i class="fa-solid fa-chevron-down"></i>
-        </button>
-        <ul class="lang-switch-menu" id="langSwitchMenu">
-          <li class="{{ app()->getLocale() === 'id' ? 'active' : '' }}"><a href="{{ route('lang.switch', 'id') }}">Bahasa Indonesia</a></li>
-          <li class="{{ app()->getLocale() === 'en' ? 'active' : '' }}"><a href="{{ route('lang.switch', 'en') }}">English</a></li>
-        </ul>
+        <div class="lang-switch-toggle">
+        <a href="{{ route('lang.switch', 'id') }}" class="lang-switch-option {{ app()->getLocale() === 'id' ? 'active' : '' }}">ID</a>
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-switch-option {{ app()->getLocale() === 'en' ? 'active' : '' }}">EN</a>
       </div>
       </div>
 
@@ -104,20 +98,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script>
 
-// ===== LANGUAGE SWITCHER DROPDOWN =====
-const langSwitchDropdown = document.getElementById("langSwitchDropdown");
-const langSwitchToggle = document.getElementById("langSwitchToggle");
-if (langSwitchDropdown && langSwitchToggle) {
-  langSwitchToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    langSwitchDropdown.classList.toggle("open");
-  });
-  document.addEventListener("click", (e) => {
-    if (!langSwitchDropdown.contains(e.target)) {
-      langSwitchDropdown.classList.remove("open");
-    }
-  });
-}
 const I18N = {
   processing: @json(__('site.btn_processing')),
   loginSubmit: @json(__('site.btn_login_submit')),

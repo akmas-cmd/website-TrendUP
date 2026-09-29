@@ -15,16 +15,10 @@
 <!-- ===== NAVBAR ===== -->
 <nav class="navbar-trendup">
   <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
-    <a href="{{ route('home') }}" class="brand-logo">TRENDUP</a>
-    <div class="lang-switch-dropdown" id="langSwitchDropdown">
-        <button class="lang-switch-btn" type="button" id="langSwitchToggle">
-          <span>{{ strtoupper(app()->getLocale()) }}</span>
-          <i class="fa-solid fa-chevron-down"></i>
-        </button>
-        <ul class="lang-switch-menu" id="langSwitchMenu">
-          <li class="{{ app()->getLocale() === 'id' ? 'active' : '' }}"><a href="{{ route('lang.switch', 'id') }}">Bahasa Indonesia</a></li>
-          <li class="{{ app()->getLocale() === 'en' ? 'active' : '' }}"><a href="{{ route('lang.switch', 'en') }}">English</a></li>
-        </ul>
+    <a href="{{ route('home') }}" class="brand-logo">TREND<span>UP</span></a>
+    <div class="lang-switch-toggle">
+        <a href="{{ route('lang.switch', 'id') }}" class="lang-switch-option {{ app()->getLocale() === 'id' ? 'active' : '' }}">ID</a>
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-switch-option {{ app()->getLocale() === 'en' ? 'active' : '' }}">EN</a>
       </div>
   </div>
 </nav>
@@ -86,7 +80,24 @@
             <div class="form-row" style="margin-bottom:0;">
               <div>
                 <label class="form-label-trendup">{{ __('site.label_city') }}</label>
-                <input type="text" class="form-control-trendup" id="buyerCity" placeholder="{{ __('site.placeholder_city') }}">
+                <div class="city-switch-dropdown" id="citySwitchDropdown">
+                  <button type="button" class="form-control-trendup city-switch-btn" id="buyerCity">
+                    <span id="buyerCityLabel" class="city-placeholder-text">{{ __('site.placeholder_city') }}</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </button>
+                  <ul class="city-switch-menu" id="citySwitchMenu">
+                    <li data-value="Jakarta">Jakarta</li>
+                    <li data-value="Bandung">Bandung</li>
+                    <li data-value="Surabaya">Surabaya</li>
+                    <li data-value="Malang">Malang</li>
+                    <li data-value="Sidoarjo">Sidoarjo</li>
+                    <li data-value="Blitar">Blitar</li>
+                    <li data-value="Semarang">Semarang</li>
+                    <li data-value="Bogor">Bogor</li>
+                    <li data-value="Yogyakarta">Yogyakarta</li>
+                    <li data-value="Medan">Medan</li>
+                  </ul>
+                </div>
                 <div class="error-msg" id="cityError">{{ __('site.err_city_required') }}</div>
               </div>
               <div>
@@ -165,20 +176,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script>
 
-// ===== LANGUAGE SWITCHER DROPDOWN =====
-const langSwitchDropdown = document.getElementById("langSwitchDropdown");
-const langSwitchToggle = document.getElementById("langSwitchToggle");
-if (langSwitchDropdown && langSwitchToggle) {
-  langSwitchToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    langSwitchDropdown.classList.toggle("open");
-  });
-  document.addEventListener("click", (e) => {
-    if (!langSwitchDropdown.contains(e.target)) {
-      langSwitchDropdown.classList.remove("open");
-    }
-  });
-}
 const I18N = {
   processing: @json(__('site.checkout_processing')),
   confirmBtn: @json(__('site.checkout_confirm_btn')),
@@ -205,7 +202,7 @@ function renderSummary(){
 
   container.innerHTML += cart.map(item => `
     <div class="summary-item">
-      <div class="thumb"><i class="${item.icon}"></i></div>
+      <div class="thumb">${item.img ? `<img src="${item.img}" alt="${item.name}">` : `<i class="${item.icon}"></i>`}</div>
       <div>
         <div class="name">${item.name}</div>
         <div class="meta">x${item.qty}</div>
@@ -219,6 +216,35 @@ function renderSummary(){
   document.getElementById("subtotalVal").textContent = formatRupiah(subtotal);
   document.getElementById("shippingVal").textContent = formatRupiah(cart.length ? SHIPPING_FEE : 0);
   document.getElementById("totalVal").textContent = formatRupiah(total);
+}
+
+// ===== CITY DROPDOWN (sama pola dgn language switcher) =====
+const citySwitchDropdown = document.getElementById("citySwitchDropdown");
+const buyerCityBtn = document.getElementById("buyerCity");
+const buyerCityLabel = document.getElementById("buyerCityLabel");
+const citySwitchMenu = document.getElementById("citySwitchMenu");
+if (citySwitchDropdown && buyerCityBtn) {
+  buyerCityBtn.value = "";
+  buyerCityBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    citySwitchDropdown.classList.toggle("open");
+  });
+  citySwitchMenu.querySelectorAll("li").forEach(li => {
+    li.addEventListener("click", () => {
+      const city = li.dataset.value;
+      buyerCityBtn.value = city;
+      buyerCityLabel.textContent = city;
+      buyerCityLabel.classList.remove("city-placeholder-text");
+      buyerCityBtn.classList.remove("error");
+      document.getElementById("cityError").classList.remove("show");
+      citySwitchDropdown.classList.remove("open");
+    });
+  });
+  document.addEventListener("click", (e) => {
+    if (!citySwitchDropdown.contains(e.target)) {
+      citySwitchDropdown.classList.remove("open");
+    }
+  });
 }
 
 function selectPayment(el){

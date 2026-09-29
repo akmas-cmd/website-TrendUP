@@ -13,7 +13,7 @@
 
 <nav class="navbar-trendup">
   <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
-    <a href="{{ route('home') }}" class="brand-logo">TRENDUP</a>
+    <a href="{{ route('home') }}" class="brand-logo">TREND<span>UP</span></a>
     <div class="d-flex align-items-center gap-3">
       <a href="{{ route('wishlist') }}" class="icon-btn" style="text-decoration:none;">
         <i class="fa-solid fa-heart"></i>
@@ -24,15 +24,9 @@
       </button>
 
       <!-- Language switcher -->
-      <div class="lang-switch-dropdown" id="langSwitchDropdown">
-        <button class="lang-switch-btn" type="button" id="langSwitchToggle">
-          <span>{{ strtoupper(app()->getLocale()) }}</span>
-          <i class="fa-solid fa-chevron-down"></i>
-        </button>
-        <ul class="lang-switch-menu" id="langSwitchMenu">
-          <li class="{{ app()->getLocale() === 'id' ? 'active' : '' }}"><a href="{{ route('lang.switch', 'id') }}">Bahasa Indonesia</a></li>
-          <li class="{{ app()->getLocale() === 'en' ? 'active' : '' }}"><a href="{{ route('lang.switch', 'en') }}">English</a></li>
-        </ul>
+      <div class="lang-switch-toggle">
+        <a href="{{ route('lang.switch', 'id') }}" class="lang-switch-option {{ app()->getLocale() === 'id' ? 'active' : '' }}">ID</a>
+        <a href="{{ route('lang.switch', 'en') }}" class="lang-switch-option {{ app()->getLocale() === 'en' ? 'active' : '' }}">EN</a>
       </div>
 
       @guest
@@ -364,20 +358,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script>
 
-// ===== LANGUAGE SWITCHER DROPDOWN =====
-const langSwitchDropdown = document.getElementById("langSwitchDropdown");
-const langSwitchToggle = document.getElementById("langSwitchToggle");
-if (langSwitchDropdown && langSwitchToggle) {
-  langSwitchToggle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    langSwitchDropdown.classList.toggle("open");
-  });
-  document.addEventListener("click", (e) => {
-    if (!langSwitchDropdown.contains(e.target)) {
-      langSwitchDropdown.classList.remove("open");
-    }
-  });
-}
 // String terjemahan dikirim dari Blade supaya JS ikut ganti bahasa
 const I18N = {
   addedBtn: @json(__('site.pd_added_to_cart_btn')),
